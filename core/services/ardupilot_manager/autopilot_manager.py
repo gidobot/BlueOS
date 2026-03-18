@@ -397,7 +397,7 @@ class AutoPilotManager(metaclass=Singleton):
     def load_sitl_frame(self) -> SITLFrame:
         if self.configuration.get("sitl_frame", SITLFrame.UNDEFINED) != SITLFrame.UNDEFINED:
             return SITLFrame(self.configuration["sitl_frame"])
-        frame = SITLFrame.VECTORED
+        frame = SITLFrame.JSON
         logger.warning(f"SITL frame is undefined. Setting {frame} as current frame.")
         self.set_sitl_frame(frame)
         return frame
@@ -445,17 +445,22 @@ class AutoPilotManager(metaclass=Singleton):
             argument=5760,
             protected=True,
         )
+
+        sitl_args = [
+            firmware_path,
+            "--model",
+            self.current_sitl_frame.value,
+            "--base-port",
+            str(master_endpoint.argument),
+            "--home",
+            "-35.3633,149.1652,0.0,270.0",
+        ]
+        # Add Gazebo JSON sim address when using JSON frame
+        if self.current_sitl_frame.value.lower() == "json":
+            sitl_args += ["--sim_address", "127.0.0.1"]
         # pylint: disable=consider-using-with
         self.ardupilot_subprocess = subprocess.Popen(
-            [
-                firmware_path,
-                "--model",
-                self.current_sitl_frame.value,
-                "--base-port",
-                str(master_endpoint.argument),
-                "--home",
-                "-27.563,-48.459,0.0,270.0",
-            ],
+            sitl_args,
             shell=False,
             encoding="utf-8",
             errors="ignore",
