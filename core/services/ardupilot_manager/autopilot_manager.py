@@ -457,7 +457,7 @@ class AutoPilotManager(metaclass=Singleton):
         ]
         # Add Gazebo JSON sim address when using JSON frame
         if self.current_sitl_frame.value.lower() == "json":
-            sitl_args += ["--sim_address", "127.0.0.1"]
+            sitl_args += ["--sim-address", "127.0.0.1"]
         # pylint: disable=consider-using-with
         self.ardupilot_subprocess = subprocess.Popen(
             sitl_args,
