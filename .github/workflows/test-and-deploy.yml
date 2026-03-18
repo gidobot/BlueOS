@@ -179,28 +179,21 @@ jobs:
             ${{ steps.prepare.outputs.buildx_args }}
 
       - name: Inspect image
-        if: success() && github.event_name != 'pull_request'  # was: always()
+        if: success() && github.event_name != 'pull_request' # was: always()
         run: |
           docker buildx imagetools \
             inspect ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
-      
-            - name: Upload artifact arm64-v8
-              uses: actions/upload-artifact@v4
-              if: success() && matrix.docker == 'core'
-              with:
-                name: BlueOS-core-docker-image-arm64-v8
-                path: '*arm64-v8.tar'
-      
-            - name: Create image artifact
-              if: success() && matrix.docker == 'core'
-              run: |
-                DOCKER_IMAGE=${DOCKER_USERNAME:-bluerobotics}/${{ matrix.project }}-${{ matrix.docker }}
-                GIT_HASH_SHORT=$(git rev-parse --short "$GITHUB_SHA")
-                docker buildx build \
-                  ${{ steps.prepare.outputs.buildx_args }} \
-                  --platform "linux/arm/v7"  \
-                  --tag ${DOCKER_IMAGE}:${GIT_HASH_SHORT} \
-                  --output "type=docker,dest=BlueOs-core-docker-image-${GIT_HASH_SHORT}-arm-v7.tar" \
+
+      - name: Create image artifact
+        if: success() && matrix.docker == 'core'
+        run: |
+          DOCKER_IMAGE=${DOCKER_USERNAME:-bluerobotics}/${{ matrix.project }}-${{ matrix.docker }}
+          GIT_HASH_SHORT=$(git rev-parse --short "$GITHUB_SHA")
+          docker buildx build \
+            ${{ steps.prepare.outputs.buildx_args }} \
+            --platform "linux/arm64/v8"  \
+            --tag ${DOCKER_IMAGE}:${GIT_HASH_SHORT} \
+            --output "type=docker,dest=BlueOs-core-docker-image-${GIT_HASH_SHORT}-arm64-v8.tar" \
 
       - name: Upload artifact arm-v7
         uses: actions/upload-artifact@v4
