@@ -447,7 +447,7 @@ class AutoPilotManager(metaclass=Singleton):
         )
 
         sitl_args = [
-            firmware_path,
+            str(firmware_path),
             "--model",
             self.current_sitl_frame.value,
             "--base-port",
